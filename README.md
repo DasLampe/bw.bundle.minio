@@ -1,6 +1,8 @@
 # MinIO - Bundlewrap
 Install and configure MinIO via [Bundlewrap](https://bundlewrap.org).
 
+- Creating buckets isn't supported yet, so you on your own.
+
 ## Config
 ```python
 node['my-node'] = {
