@@ -6,7 +6,7 @@ Description=Minio
 Documentation=https://docs.minio.io
 Wants=network-online.target
 After=network-online.target
-AssertFileIsExecutable={{ path }}
+AssertFileIsExecutable={{ cfg.get('path') }}
 
 # Avoid noisy crashloops
 StartLimitIntervalSec=60
@@ -15,15 +15,20 @@ StartLimitBurst=5
 [Service]
 WorkingDirectory=/usr/local/
 
-User={{ user }}
-Group={{ group }}
+User={{ cfg.get('user') }}
+Group={{ cfg.get('group') }}
 
 PermissionsStartOnly=true
 
-EnvironmentFile={{ environment_file }}
-ExecStartPre=/bin/bash -c "[ -n \"${MINIO_VOLUMES}\" ] || echo \"Variable MINIO_VOLUMES not set in {{ environment_file }}\""
+Environment="MINIO_VOLUMES={{ cfg.get('data_path') }}"
+Environment="MINIO_SERVER_URL={{ cfg.get('server_url') }}"
+Environment="MINIO_BROWSER_REDIRECT_URL={{ cfg.get('console_url', cfg.get('server_url') + '/minio/ui') }}"
+Environment="MINIO_ROOT_USER={{ cfg.get('root_user') }}"
+Environment="MINIO_ROOT_PASSWORD={{ cfg.get('root_password') }}"
+Environment="MINIO_OPTS="
+ExecStartPre=/bin/bash -c "[ -n \"${MINIO_VOLUMES}\" ] || echo \"Variable MINIO_VOLUMES not set.\""
 
-ExecStart={{ path }} server $MINIO_OPTS $MINIO_VOLUMES
+ExecStart={{ cfg.get('path') }} server --address {{ cfg.get('address') }}:{{ cfg.get('port') }} --console-address {{ cfg.get('address') }}:{{ cfg.get('console_port') }} $MINIO_OPTS $MINIO_VOLUMES
 
 # Let systemd always restart this service, in limits defined by StartLimitIntervalSec and StartLimitBurst.
 Restart=always
